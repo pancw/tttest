@@ -1,21 +1,38 @@
+function chsize(char)
+    if not char then
+        return 0
+    elseif char > 240 then
+        return 4
+    elseif char > 225 then
+        return 3
+    elseif char > 192 then
+        return 2
+    else
+        return 1
+    end
+end
+
+------------------------------------------------utf8
 local test = {
 	"abcrr",
 	"bc",
 	"d",
+	"你好吗",
+	"好吗",
+	"你好",
 }
-local input = "abcd"
+local input = "不好你好吗bbbbdbc"
 
 function createNode()
-	local node = {
+	return {
 		_allChildrenTbl = {
 			--[[
 			[char] = node,
 			--]]
 		},
 		_fail = nil; -- node
-		_word = nil;	-- "string"
+		_word = nil; -- "string"
 	}
-	return node
 end
 
 function getFailPointer(node)
@@ -50,7 +67,6 @@ function getAllChildrenTbl(node)
 	return node._allChildrenTbl
 end
 
--- work
 local root = createNode()
 
 function add(s)
@@ -58,10 +74,13 @@ function add(s)
 		return
 	end	
 
-	local now = root;
-	for i=1, #s do
-		-- TODO utf8
-		local c = s:sub(i,i)
+	local now = root
+	local i = 1
+	while (i <= #s) do
+		local utfLen = chsize(string.byte(s, i))
+		local c = s:sub(i, utfLen + i - 1)
+		i = i + utfLen
+
 		if not hasChild(now, c) then
 			addChild(now, c)	
 		end	
@@ -102,9 +121,12 @@ end
 
 function try_match(input)
 	local now = root
-	for i=1, #input do
-		-- TODO utf8
-		local c = input:sub(i,i)
+	local i = 1
+	while (i <= #input) do
+		local utfLen = chsize(string.byte(input, i))
+		local c = input:sub(i, utfLen + i -1)
+		i = i + utfLen
+
 		while ((not hasChild(now, c)) and (now ~= root)) do
 			now = getFailPointer(now)
 		end
@@ -113,21 +135,25 @@ function try_match(input)
 			now = getChildByChar(now, c)	
 		end	
 
-		if getWord(now) then -- matched
-			print("matched a word:", getWord(now))
-		else
+		-- 如果只是把敏感变*，这个if可以开着，match的子串没必要再找出来了。
+		--if getWord(now) then -- matched
+		--	print("matched:", getWord(now))
+		--else
 			local t = now
 			while( t ~= root ) do
 				if getWord(t) then
-					print("matched a sub word:", getWord(t))
+					print("matched:", getWord(t))
 				end
 				t = getFailPointer(t)
 			end
-		end
+		--end
 	end
 end
 
-build_tree()
-build_fail_pointer()
+function main()
+	build_tree()
+	build_fail_pointer()
+	try_match(input)
+end
 
-try_match(input)
+main()
