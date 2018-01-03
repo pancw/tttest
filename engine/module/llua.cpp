@@ -2,18 +2,26 @@
 
 static int send(lua_State* L)
 {
-	printf("call lua send.\n");	
+}
+
+static int lgetUTime(lua_State *L) 
+{   
+	struct timeval tv; 
+	gettimeofday(&tv, NULL);
+	unsigned long long now = tv.tv_sec*1000000 + tv.tv_usec;
+	lua_pushnumber(L, now);
+	return 1;
 }
 
 const luaL_reg lualib[] =
 {
 	{"send", send},
+	{"getUTime", lgetUTime},
 	{NULL, NULL},
 };
 
 void luaopen_libs(lua_State* L)
 {
-	luaL_openlibs(L);
 	luaL_register(L, "llua", lualib);	
 }
 

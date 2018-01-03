@@ -9,8 +9,16 @@ extern "C" {
 
 #include "engine_base.h"
 #include "llua.h"
+#include "ac.h"
 
 lua_State *GlobalL;
+
+static void luaopen_all_libs(lua_State * L)
+{
+	luaL_openlibs(L);
+	luaopen_libs(L);
+	luaopen_ac_libs(L);
+}
 
 int main()
 {
@@ -25,7 +33,7 @@ int main()
 	// init
 	engine_base_init();	
 	GlobalL = luaL_newstate();
-	luaopen_libs(GlobalL);
+	luaopen_all_libs(GlobalL);
 
     lua_pushcclosure(GlobalL, error_fun, 0); 
     int err = luaL_loadfile(GlobalL, "main.lua");   

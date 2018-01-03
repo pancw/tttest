@@ -159,4 +159,4 @@ function main()
 	try_match(input)
 end
 
-main()
+--main()

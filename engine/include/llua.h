@@ -8,6 +8,7 @@ extern "C" {
 #include "lualib.h"
 }
 #include <iostream>
+#include <sys/time.h>
 
 void luaopen_libs(lua_State *L);
 int error_fun(lua_State *state);
